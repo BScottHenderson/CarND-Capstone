@@ -112,7 +112,7 @@ class WaypointUpdater(object):
         self.base_waypoints = waypoints
         if not self.waypoints_2d:
             # 2D version of base waypoints - z-coordinate removed.
-            self.waypoints_2d = [[waypoint.pose.position.x, waypoint.pose.position.y] for waypoint in waypoints.waypoints]
+            self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.base_waypoints.waypoints]
             # kd-tree for quick nearest-neighbor lookup (scipy.spatial)
             self.waypoint_tree = KDTree(self.waypoints_2d)
 
