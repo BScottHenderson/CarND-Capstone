@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
+import numpy as np
+
 import rospy
 from geometry_msgs.msg import PoseStamped
 from styx_msgs.msg import Lane, Waypoint
+
+from scipy.spatial import KDTree
 
 import math
 
@@ -37,16 +41,80 @@ class WaypointUpdater(object):
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # TODO: Add other member variables you need below
+        self.current_pose   = None  # Current vehicle position.
+        self.base_waypoints = None  # A list of all waypoints for the track.
+        self.waypoints_2d   = None
+        self.waypoint_tree  = None
 
-        rospy.spin()
+        # Publish waypoints until shut down.
+        self.loop()
+
+    def loop(self):
+        """
+        Publish waypoints until shut down.
+        """
+        rate = rospy.Rate(50)   # Publish rate: 50 Hz
+        while not rospy.is_shutdown():
+            # Make sure we have a current car position and the base waypoints.
+            if self.current_pose and self.base_waypoints:
+                closest_waypoint_idx = self.get_closest_waypoint_idx()
+                self.publish_waypoints(closest_waypoint_idx)
+            # Sleep for a bit.
+            rate.sleep()
+
+    def get_closest_waypoint_idx(self):
+        """
+        Get the closest waypoint that is ahead of the current vehicle position.
+        """
+        x = self.current_pose.pose.position.x
+        y = self.current_pose.pose.position.y
+        closest_idx = self.waypoint_tree.query([x, y], 1)[1]
+
+        # Is the closest waypoint ahead or behind the vehicle?
+        closest_coord = self.waypoints_2d[closest_idx]
+        prev_coord    = self.waypoints_2d[closest_idx-1]
+
+        # Equation for hyperplane through closest coords.
+        closest_vect = np.array(closest_coord)
+        prev_vect    = np.array(prev_coord)
+        pose_vect    = np.array([x, y])
+        val = np.dot(closest_vect - prev_vect, pose_vect - closest_vect)
+
+        # If the closest waypoint is behind the vehicle, just take the next waypoint.
+        if val > 0:
+            closest_idx = (closest_idx + 1) % len(self.waypoints_2d)
+
+        return closest_idx
+
+    def publish_waypoints(self, closest_idx):
+        """
+        The list published to /final_waypoints should include just a fixed number of waypoints
+        currently ahead of the vehicle:
+
+            The first waypoint in the list published to /final_waypoints should be the first
+            waypoint that is currently ahead of the car.
+
+            The total number of waypoints ahead of the vehicle that should be included in the
+            /final_waypoints list is provided by the LOOKAHEAD_WPS variable.
+        """
+        lane = Lane()
+        lane.header = self.base_waypoints.header
+        lane.waypoints = self.base_waypoints.waypoints[closest_idx:closest_idx + LOOKAHEAD_WPS]
+        self.final_waypoints_pub.publish(lane)
 
     def pose_cb(self, msg):
-        # TODO: Implement
-        pass
+        # Save the current vehicle position.
+        self.current_pose = msg
 
     def waypoints_cb(self, waypoints):
-        # TODO: Implement
-        pass
+        # Save waypoints for later use.
+        # This list includes all waypoints for the track - the '/base_waypoints' publisher publishes only once.
+        self.base_waypoints = waypoints
+        if not self.waypoints_2d:
+            # 2D version of base waypoints - z-coordinate removed.
+            self.waypoints_2d = [[waypoint.pose.position.x, waypoint.pose.position.y] for waypoint in waypoints.waypoints]
+            # kd-tree for quick nearest-neighbor lookup (scipy.spatial)
+            self.waypoint_tree = KDTree(self.waypoints_2d)
 
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
