@@ -109,7 +109,7 @@ class WaypointUpdater(object):
         # Save waypoints for later use.
         # This list includes all waypoints for the track - the '/base_waypoints' publisher publishes only once.
         self.base_waypoints = waypoints
-        rospy.loginfo('Received %d waypoints.', len(self.base_waypoints.waypoints))
+        rospy.loginfo('Received {} waypoints.'.format(len(self.base_waypoints.waypoints)))
         if not self.waypoints_2d:
             # 2D version of base waypoints - z-coordinate removed.
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.base_waypoints.waypoints]
