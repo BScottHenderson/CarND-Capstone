@@ -89,6 +89,7 @@ class Controller(object):
         elif throttle < 0.1 and velocity_error < 0:
             throttle = 0.
             decel    = max(velocity_error, self.decel_limit)
+            # torque: vehicle mass in kg, wheel radius in m
             # brake    = abs(decel) * (self.vehicle_mass + (self.fuel_capacity * GAS_DENSITY)) * self.wheel_radius
             brake    = abs(decel) * self.vehicle_mass * self.wheel_radius
 
