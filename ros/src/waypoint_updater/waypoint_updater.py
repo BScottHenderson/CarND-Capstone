@@ -32,19 +32,18 @@ class WaypointUpdater(object):
     def __init__(self):
         rospy.init_node('waypoint_updater')
 
-        rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
-        rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
+        rospy.Subscriber('/current_pose',   PoseStamped, self.pose_cb)
+        rospy.Subscriber('/base_waypoints', Lane,        self.waypoints_cb)
 
         # TODO: Add a subscriber for /traffic_waypoint and /obstacle_waypoint below
-
 
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # TODO: Add other member variables you need below
         self.current_pose   = None  # Current vehicle position.
         self.base_waypoints = None  # A list of all waypoints for the track.
-        self.waypoints_2d   = None
-        self.waypoint_tree  = None
+        self.waypoints_2d   = None  # Waypoints in 2D (z coordinate removed).
+        self.waypoint_tree  = None  # KDTree of 2D waypoints.
 
         # Publish waypoints until shut down.
         self.loop()
