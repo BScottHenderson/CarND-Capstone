@@ -68,6 +68,8 @@ class WaypointUpdater(object):
         x = self.current_pose.pose.position.x
         y = self.current_pose.pose.position.y
         closest_idx = self.waypoint_tree.query([x, y], 1)[1]
+        # Return one point                             ^
+        # Get the index of the point                      ^
 
         # Is the closest waypoint ahead or behind the vehicle?
         closest_coord = self.waypoints_2d[closest_idx]
@@ -112,7 +114,7 @@ class WaypointUpdater(object):
         rospy.loginfo('Received {} waypoints.'.format(len(self.base_waypoints.waypoints)))
         if not self.waypoints_2d:
             # 2D version of base waypoints - z-coordinate removed.
-            self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.base_waypoints.waypoints]
+            self.waypoints_2d  = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.base_waypoints.waypoints]
             # kd-tree for quick nearest-neighbor lookup (scipy.spatial)
             self.waypoint_tree = KDTree(self.waypoints_2d)
             rospy.loginfo('Translated waypoints to 2D and created KDTree.')
