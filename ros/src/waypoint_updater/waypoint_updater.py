@@ -169,12 +169,12 @@ class WaypointUpdater(object):
         # This list includes all waypoints for the track - the '/base_waypoints' publisher publishes only once.
         self.base_waypoints = waypoints
         rospy.loginfo('Received {} waypoints.'.format(len(self.base_waypoints.waypoints)))
-        if not self.waypoints_2d:
-            # 2D version of base waypoints - z-coordinate removed.
-            self.waypoints_2d  = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.base_waypoints.waypoints]
-            # kd-tree for quick nearest-neighbor lookup (scipy.spatial)
-            self.waypoint_tree = KDTree(self.waypoints_2d)
-            rospy.loginfo('Translated waypoints to 2D and created KDTree.')
+        # if not self.waypoints_2d:
+        # 2D version of base waypoints - z-coordinate removed.
+        self.waypoints_2d  = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.base_waypoints.waypoints]
+        # kd-tree for quick nearest-neighbor lookup (scipy.spatial)
+        self.waypoint_tree = KDTree(self.waypoints_2d)
+        rospy.loginfo('Translated waypoints to 2D and created KDTree.')
 
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
