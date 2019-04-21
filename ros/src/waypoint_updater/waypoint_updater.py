@@ -28,6 +28,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
 MAX_DECEL     = 0.5 # Deceleration limit.
+MAX_SPEED_METERS_PER_SEC = 10*0.447 # 10 mph
 
 
 class WaypointUpdater(object):
@@ -63,10 +64,7 @@ class WaypointUpdater(object):
         rate = rospy.Rate(50)   # Publish rate: 50 Hz
         while not rospy.is_shutdown():
             # Make sure we have a current car position and the base waypoints.
-            # Also check for 'waypoint_tree' in case the delay between getting 'base_waypoints'
-            # and creating 'waypoint_tree' is such that we get to 'get_closest_waypoint_idx()'
-            # before the waypoint KDTree has been created.
-            if self.current_pose and self.base_waypoints and self.waypoint_tree:
+            if self.current_pose and self.base_waypoints:
                 closest_waypoint_idx = self.get_closest_waypoint_idx()
                 self.publish_waypoints(closest_waypoint_idx)
             # Sleep for a bit.
@@ -112,6 +110,8 @@ class WaypointUpdater(object):
         lane = Lane()
         lane.header = self.base_waypoints.header
         lane.waypoints = self.base_waypoints.waypoints[closest_idx:closest_idx + LOOKAHEAD_WPS]
+        for i in range(len(lane.waypoints)):
+            self.set_waypoint_velocity(lane.waypoints, i, MAX_SPEED_METERS_PER_SEC)
         self.final_waypoints_pub.publish(lane)
         # final_lane = self.generate_lane()
         # self.final_waypoints_pub.publish(final_lane)
@@ -169,7 +169,6 @@ class WaypointUpdater(object):
         # This list includes all waypoints for the track - the '/base_waypoints' publisher publishes only once.
         self.base_waypoints = waypoints
         rospy.loginfo('Received {} waypoints.'.format(len(self.base_waypoints.waypoints)))
-        # if not self.waypoints_2d:
         # 2D version of base waypoints - z-coordinate removed.
         self.waypoints_2d  = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.base_waypoints.waypoints]
         # kd-tree for quick nearest-neighbor lookup (scipy.spatial)
