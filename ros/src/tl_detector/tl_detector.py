@@ -71,7 +71,7 @@ class TLDetector(object):
     def waypoints_cb(self, waypoints):
         self.waypoints     = waypoints
         # 2D version of base waypoints - z-coordinate removed.
-        self.waypoints_2d  = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.base_waypoints.waypoints]
+        self.waypoints_2d  = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.waypoints.waypoints]
         # kd-tree for quick nearest-neighbor lookup (scipy.spatial)
         self.waypoint_tree = KDTree(self.waypoints_2d)
 
