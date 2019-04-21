@@ -63,7 +63,10 @@ class WaypointUpdater(object):
         rate = rospy.Rate(50)   # Publish rate: 50 Hz
         while not rospy.is_shutdown():
             # Make sure we have a current car position and the base waypoints.
-            if self.current_pose and self.base_waypoints:
+            # Also check for 'waypoint_tree' in case the delay between getting 'base_waypoints'
+            # and creating 'waypoint_tree' is such that we get to 'get_closest_waypoint_idx()'
+            # before the waypoint KDTree has been created.
+            if self.current_pose and self.base_waypoints and self.waypoint_tree:
                 closest_waypoint_idx = self.get_closest_waypoint_idx()
                 self.publish_waypoints(closest_waypoint_idx)
             # Sleep for a bit.
