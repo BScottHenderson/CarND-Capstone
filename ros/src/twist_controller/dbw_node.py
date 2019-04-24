@@ -87,13 +87,12 @@ class DBWNode(object):
             # You should only publish the control commands if dbw is enabled
             rospy.logwarn('Looping at 50Hz')
             if not None in (self.linear_velocity, self.angular_velocity, self.current_velocity):
-                rospy.logwarn('Call controller.control()')
+                rospy.logwarn('DBW enabled: {}'.format(self.dbw_enabled))
                 self.throttle, self.brake, self.steering = self.controller.control(self.linear_velocity,    # <proposed linear velocity>,
                                                                                    self.angular_velocity,   # <proposed angular velocity>,
                                                                                    self.current_velocity,   # <current linear velocity>,
                                                                                    self.dbw_enabled)        # <dbw status>,
                                                                                                             # <any other argument you need>)
-                rospy.logwarn('DBW enabled: {}'.format(self.dbw_enabled))
                 if self.dbw_enabled:
                     self.publish(self.throttle, self.brake, self.steering)
             rate.sleep()
@@ -118,7 +117,8 @@ class DBWNode(object):
 
     def dbw_enabled_cb(self, msg):
         # Is Drive-By-Wire enabled? It not then the human driver has control.
-        self.dbw_enabled = msg
+        rospy.logwarn('DBW enabled callback. msg: {}'.format(msg))
+        self.dbw_enabled = msg.data
 
     def twist_cmd_cb(self, msg):
         self.linear_velocity  = msg.twist.linear.x
