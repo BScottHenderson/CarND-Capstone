@@ -28,7 +28,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
 MAX_DECEL     = 0.5 # Deceleration limit.
-MAX_SPEED_METERS_PER_SEC = 100*0.447 # 10 mph
+MAX_SPEED_METERS_PER_SEC = 10*0.447 # 10 mph
 
 
 class WaypointUpdater(object):
@@ -49,6 +49,7 @@ class WaypointUpdater(object):
         # TODO: Add other member variables you need below
         self.current_pose    = None # Current vehicle position.
         self.base_waypoints  = None # A list of all waypoints for the track.
+        self.waypoints_cycle = None # Waypoints cycle (wrap-around).
         self.waypoints_2d    = None # Waypoints in 2D (z coordinate removed).
         self.waypoint_tree   = None # KDTree of 2D waypoints.
         self.stopline_wp_idx = -1   # Waypoint index for a red light stop line.
@@ -109,9 +110,8 @@ class WaypointUpdater(object):
         """
         lane = Lane()
         lane.header = self.base_waypoints.header
-        lane.waypoints = self.base_waypoints.waypoints[closest_idx:closest_idx + LOOKAHEAD_WPS]
-        for i in range(len(lane.waypoints)):
-            self.set_waypoint_velocity(lane.waypoints, i, MAX_SPEED_METERS_PER_SEC)
+        # lane.waypoints = self.base_waypoints.waypoints[closest_idx:closest_idx + LOOKAHEAD_WPS]
+        lane.waypoints = self.waypoints_cycle[closest_idx:closest_idx + LOOKAHEAD_WPS]
         self.final_waypoints_pub.publish(lane)
         # final_lane = self.generate_lane()
         # self.final_waypoints_pub.publish(final_lane)
@@ -168,6 +168,7 @@ class WaypointUpdater(object):
         # Save waypoints for later use.
         # This list includes all waypoints for the track - the '/base_waypoints' publisher publishes only once.
         self.base_waypoints = waypoints
+        self.waypoints_cycle = cycle(self.base_waypoints.waypoints)
         rospy.loginfo('Received {} waypoints.'.format(len(self.base_waypoints.waypoints)))
         # 2D version of base waypoints - z-coordinate removed.
         self.waypoints_2d  = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.base_waypoints.waypoints]
@@ -190,6 +191,9 @@ class WaypointUpdater(object):
         waypoints[waypoint].twist.twist.linear.x = velocity
 
     def distance(self, waypoints, wp1, wp2):
+        """
+        Accumulate piece-wise distance for each segment betweeen 'wp1' and 'wp2'.
+        """
         dist = 0
         dl = lambda a, b: math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2  + (a.z-b.z)**2)
         for i in range(wp1, wp2+1):
