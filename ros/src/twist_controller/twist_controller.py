@@ -5,8 +5,8 @@ from yaw_controller import YawController
 from pid import PID
 from lowpass import LowPassFilter
 
-MIN_SPEED   = 0.1   # m/s
 GAS_DENSITY = 2.858
+MIN_SPEED   = 0.1   # m/s
 ONE_MPH     = 0.44704
 
 
@@ -52,13 +52,13 @@ class Controller(object):
             self.throttle_controller.reset()
             return 0., 0., 0.
 
-        rospy.logwarn('Target linear velocity : {}'.format(linear_velocity))
-        rospy.logwarn('Target angular velocity: {}'.format(angular_velocity))
-        rospy.logwarn('Current velocity : {}'.format(current_velocity))
+        # rospy.logwarn('Target linear velocity : {}'.format(linear_velocity))
+        # rospy.logwarn('Target angular velocity: {}'.format(angular_velocity))
+        # rospy.logwarn('Current velocity : {}'.format(current_velocity))
 
         # Apply the low pass filter to the current velocity.
         current_velocity = self.velocity_lpf.filt(current_velocity)
-        rospy.logwarn('Filtered velocity: {}'.format(current_velocity))
+        # rospy.logwarn('Filtered velocity: {}'.format(current_velocity))
 
         steering = self.yaw_controller.get_steering(linear_velocity, angular_velocity, current_velocity)
 
