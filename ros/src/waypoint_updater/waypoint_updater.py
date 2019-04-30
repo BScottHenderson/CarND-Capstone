@@ -112,7 +112,7 @@ class WaypointUpdater(object):
         lane = Lane()
         lane.header = self.base_waypoints.header
         # lane.waypoints = self.base_waypoints.waypoints[closest_idx:closest_idx + LOOKAHEAD_WPS]
-        lane.waypoints = islice(self.waypoints_cycle, closest_idx, closest_idx + LOOKAHEAD_WPS)
+        lane.waypoints = list(islice(self.waypoints_cycle, closest_idx, closest_idx + LOOKAHEAD_WPS))
         self.final_waypoints_pub.publish(lane)
         # final_lane = self.generate_lane()
         # self.final_waypoints_pub.publish(final_lane)
