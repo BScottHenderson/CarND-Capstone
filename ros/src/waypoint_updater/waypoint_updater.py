@@ -10,7 +10,7 @@ from styx_msgs.msg import Lane, Waypoint
 from scipy.spatial import KDTree
 
 import math
-from itertools import cycle
+from itertools import cycle, islice
 
 '''
 This node will publish waypoints from the car's current position to some `x` distance ahead.
@@ -112,7 +112,7 @@ class WaypointUpdater(object):
         lane = Lane()
         lane.header = self.base_waypoints.header
         # lane.waypoints = self.base_waypoints.waypoints[closest_idx:closest_idx + LOOKAHEAD_WPS]
-        lane.waypoints = self.waypoints_cycle[closest_idx:closest_idx + LOOKAHEAD_WPS]
+        lane.waypoints = islice(self.waypoints_cycle, closest_idx, closest_idx + LOOKAHEAD_WPS)
         self.final_waypoints_pub.publish(lane)
         # final_lane = self.generate_lane()
         # self.final_waypoints_pub.publish(final_lane)
