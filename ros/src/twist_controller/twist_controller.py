@@ -19,8 +19,10 @@ class Controller(object):
 
         # Use a PID controller for the throttle.
         # Parameters determined experimentally -> provided by Udacity.
-        kp = 0.3
-        ki = 0.1
+        # kp = 0.3
+        # ki = 0.1
+        kp = 1.5
+        ki = 0.001
         kd = 0.
         mn = 0.     # Min. throttle value
         mx = 0.2    # Max. throttle value
@@ -33,6 +35,7 @@ class Controller(object):
 
         self.vehicle_mass   = vehicle_mass
         self.fuel_capacity  = fuel_capacity
+        self.total_mass     = vehicle_mass + (fuel_capacity * GAS_DENSITY)
         self.brake_deadband = brake_deadband
         self.decel_limit    = decel_limit
         self.accel_limit    = accel_limit
@@ -90,7 +93,6 @@ class Controller(object):
             throttle = 0.
             decel    = max(velocity_error, self.decel_limit)
             # torque: vehicle mass in kg, wheel radius in m
-            # brake    = abs(decel) * (self.vehicle_mass + (self.fuel_capacity * GAS_DENSITY)) * self.wheel_radius
-            brake    = abs(decel) * self.vehicle_mass * self.wheel_radius
+            brake    = abs(decel) * self.total_mass * self.wheel_radius
 
         return throttle, brake, steering
