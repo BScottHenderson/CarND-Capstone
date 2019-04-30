@@ -10,6 +10,7 @@ from styx_msgs.msg import Lane, Waypoint
 from scipy.spatial import KDTree
 
 import math
+from itertools import cycle
 
 '''
 This node will publish waypoints from the car's current position to some `x` distance ahead.
