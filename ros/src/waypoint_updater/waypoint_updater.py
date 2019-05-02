@@ -117,7 +117,7 @@ class WaypointUpdater(object):
 
     def generate_lane(self):
         lane = Lane()
-        lane.header = self.base_waypoints.header
+        # lane.header = self.base_waypoints.header
 
         # Get the next LOOKAHEAD_WPS waypoints in front of the current vehicle position.
         closest_idx  = self.get_closest_waypoint_idx()
