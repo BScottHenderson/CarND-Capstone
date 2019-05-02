@@ -109,13 +109,8 @@ class WaypointUpdater(object):
             The total number of waypoints ahead of the vehicle that should be included in the
             /final_waypoints list is provided by the LOOKAHEAD_WPS variable.
         """
-        lane = Lane()
-        lane.header = self.base_waypoints.header
-        # lane.waypoints = self.base_waypoints.waypoints[closest_idx:closest_idx + LOOKAHEAD_WPS]
-        lane.waypoints = list(islice(self.waypoints_cycle, closest_idx, closest_idx + LOOKAHEAD_WPS))
-        self.final_waypoints_pub.publish(lane)
-        # final_lane = self.generate_lane()
-        # self.final_waypoints_pub.publish(final_lane)
+        final_lane = self.generate_lane()
+        self.final_waypoints_pub.publish(final_lane)
 
     def generate_lane(self):
         lane = Lane()
@@ -125,9 +120,14 @@ class WaypointUpdater(object):
         closest_idx  = self.get_closest_waypoint_idx()
         farthest_idx = closest_idx + LOOKAHEAD_WPS
         waypoints = self.base_waypoints.waypoints[closest_idx:farthest_idx]
+        # waypoints = list(islice(self.waypoints_cycle, closest_idx, closest_idx + LOOKAHEAD_WPS))
 
+        # If we have not detected a traffic light or we have but it's still farther away
+        # than our lookahead buffer (LOOKAHEAD_WPS), then just return waypoints without
+        # adjusted speed.
         if self.stopline_wp_idx == -1 or self.stopline_wp_idx >= farthest_idx:
             lane.waypoints = waypoints
+        # We have detected a traffic light within our lookahead buffer, so slow down.
         else:
             lane.waypoints = self.decelerate_waypoints(waypoints, closest_idx)
 
@@ -179,7 +179,8 @@ class WaypointUpdater(object):
 
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
-        self.stopline_wp_idx = msg.data
+        # self.stopline_wp_idx = msg.data
+        pass
 
     def obstacle_cb(self, msg):
         # TODO: Callback for /obstacle_waypoint message. We will implement it later
