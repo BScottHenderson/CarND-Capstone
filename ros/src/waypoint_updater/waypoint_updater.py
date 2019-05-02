@@ -38,23 +38,26 @@ class WaypointUpdater(object):
 
         self.decel_limit = rospy.get_param('~decel_limit', -5)
 
-        rospy.Subscriber('/current_pose',      PoseStamped, self.pose_cb)
-        rospy.Subscriber('/base_waypoints',    Lane,        self.waypoints_cb)
+        rospy.Subscriber('/current_pose',      PoseStamped,  self.pose_cb)
+        rospy.Subscriber('/base_waypoints',    Lane,         self.waypoints_cb)
 
         # TODO: Add a subscriber for /traffic_waypoint and /obstacle_waypoint below
-        rospy.Subscriber('/traffic_waypoint',  Int32,       self.traffic_cb)
-        rospy.Subscriber('/obstacle_waypoint', Int32,       self.obstacle_cb)
+        rospy.Subscriber('/traffic_waypoint',  Int32,        self.traffic_cb)
+        rospy.Subscriber('/obstacle_waypoint', Int32,        self.obstacle_cb)
+
+        rospy.Subscriber('/current_velocity',  TwistStamped, self.current_velocity_cb)
 
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # TODO: Add other member variables you need below
-        self.current_pose    = None # Current vehicle position.
-        self.base_waypoints  = None # A list of all waypoints for the track.
-        self.waypoints_cycle = None # Waypoints cycle (wrap-around).
-        self.waypoints_2d    = None # Waypoints in 2D (z coordinate removed).
-        self.waypoint_tree   = None # KDTree of 2D waypoints.
-        self.stopline_wp_idx = -1   # Waypoint index for a red light stop line.
-        self.obstacle_wp_idx = -1   # Waypoint index for an obstacle.
+        self.current_pose     = None # Current vehicle position.
+        self.current_velocity = None # Current vehicle velocity.
+        self.base_waypoints   = None # A list of all waypoints for the track.
+        self.waypoints_cycle  = None # Waypoints cycle (wrap-around).
+        self.waypoints_2d     = None # Waypoints in 2D (z coordinate removed).
+        self.waypoint_tree    = None # KDTree of 2D waypoints.
+        self.stopline_wp_idx  = -1   # Waypoint index for a red light stop line.
+        self.obstacle_wp_idx  = -1   # Waypoint index for an obstacle.
 
         # Publish waypoints until shut down.
         self.loop()
@@ -119,8 +122,8 @@ class WaypointUpdater(object):
         # Get the next LOOKAHEAD_WPS waypoints in front of the current vehicle position.
         closest_idx  = self.get_closest_waypoint_idx()
         farthest_idx = closest_idx + LOOKAHEAD_WPS
-        waypoints = self.base_waypoints.waypoints[closest_idx:farthest_idx]
-        # waypoints = list(islice(self.waypoints_cycle, closest_idx, closest_idx + LOOKAHEAD_WPS))
+        # waypoints = self.base_waypoints.waypoints[closest_idx:farthest_idx]
+        waypoints = list(islice(self.waypoints_cycle, closest_idx, closest_idx + LOOKAHEAD_WPS))
 
         # If we have not detected a traffic light or we have but it's still farther away
         # than our lookahead buffer (LOOKAHEAD_WPS), then just return waypoints without
@@ -161,6 +164,10 @@ class WaypointUpdater(object):
 
         return new_waypoints
 
+    #
+    # Callbacks
+    #
+
     def pose_cb(self, msg):
         # Save the current vehicle position.
         self.current_pose = msg
@@ -179,12 +186,18 @@ class WaypointUpdater(object):
 
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
-        # self.stopline_wp_idx = msg.data
-        pass
+        self.stopline_wp_idx = msg.data
 
     def obstacle_cb(self, msg):
         # TODO: Callback for /obstacle_waypoint message. We will implement it later
         self.obstacle_wp_idx = msg.data
+
+    def current_velocity_cb(self, msg):
+        self.current_velocity = msg.twist.linear.x
+
+    #
+    # Helper Functions
+    #
 
     def get_waypoint_velocity(self, waypoint):
         return waypoint.twist.twist.linear.x
