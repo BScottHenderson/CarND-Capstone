@@ -122,8 +122,8 @@ class WaypointUpdater(object):
         # Get the next LOOKAHEAD_WPS waypoints in front of the current vehicle position.
         closest_idx  = self.get_closest_waypoint_idx()
         farthest_idx = closest_idx + LOOKAHEAD_WPS
-        # waypoints = self.base_waypoints.waypoints[closest_idx:farthest_idx]
-        waypoints = list(islice(self.waypoints_cycle, closest_idx, closest_idx + LOOKAHEAD_WPS))
+        waypoints = self.base_waypoints.waypoints[closest_idx:farthest_idx]
+        # waypoints = list(islice(self.waypoints_cycle, closest_idx, closest_idx + LOOKAHEAD_WPS))
 
         # If we have not detected a traffic light or we have but it's still farther away
         # than our lookahead buffer (LOOKAHEAD_WPS), then just return waypoints without
@@ -173,24 +173,16 @@ class WaypointUpdater(object):
         self.current_pose = msg
 
     def waypoints_cb(self, waypoints):
+        # Save waypoints for later use.
+        # This list includes all waypoints for the track - the '/base_waypoints' publisher publishes only once.
         self.base_waypoints = waypoints
         self.waypoints_cycle = cycle(self.base_waypoints.waypoints)
-        if not self.waypoints_2d:
-            self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in
-                                 waypoints.waypoints]
-            self.waypoint_tree = KDTree(self.waypoints_2d)
-
-    # def waypoints_cb(self, waypoints):
-    #     # Save waypoints for later use.
-    #     # This list includes all waypoints for the track - the '/base_waypoints' publisher publishes only once.
-    #     self.base_waypoints = waypoints
-    #     self.waypoints_cycle = cycle(self.base_waypoints.waypoints)
-    #     rospy.loginfo('Received {} waypoints.'.format(len(self.base_waypoints.waypoints)))
-    #     # 2D version of base waypoints - z-coordinate removed.
-    #     self.waypoints_2d  = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.base_waypoints.waypoints]
-    #     # kd-tree for quick nearest-neighbor lookup (scipy.spatial)
-    #     self.waypoint_tree = KDTree(self.waypoints_2d)
-    #     rospy.loginfo('Translated waypoints to 2D and created KDTree.')
+        rospy.loginfo('Received {} waypoints.'.format(len(self.base_waypoints.waypoints)))
+        # 2D version of base waypoints - z-coordinate removed.
+        self.waypoints_2d  = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.base_waypoints.waypoints]
+        # kd-tree for quick nearest-neighbor lookup (scipy.spatial)
+        self.waypoint_tree = KDTree(self.waypoints_2d)
+        rospy.loginfo('Translated waypoints to 2D and created KDTree.')
 
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
