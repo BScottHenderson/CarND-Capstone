@@ -76,51 +76,30 @@ class WaypointUpdater(object):
             rate.sleep()
 
     def get_closest_waypoint_idx(self):
+        """
+        Get the closest waypoint that is ahead of the current vehicle position.
+        """
         x = self.current_pose.pose.position.x
         y = self.current_pose.pose.position.y
         closest_idx = self.waypoint_tree.query([x, y], 1)[1]
+        # Return one point                             ^
+        # Get the index of the point                      ^
 
-        # Check if closest is ahead or behind vehicle
+        # Is the closest waypoint ahead or behind the vehicle?
         closest_coord = self.waypoints_2d[closest_idx]
-        prev_coord = self.waypoints_2d[closest_idx - 1]
+        prev_coord    = self.waypoints_2d[closest_idx-1]
 
-        # Equation for hyperplane through closest_coords
-        cl_vect = np.array(closest_coord)
-        prev_vect = np.array(prev_coord)
-        pos_vect = np.array([x, y])
+        # Equation for hyperplane through closest coords.
+        closest_vect = np.array(closest_coord)
+        prev_vect    = np.array(prev_coord)
+        pose_vect    = np.array([x, y])
+        val = np.dot(closest_vect - prev_vect, pose_vect - closest_vect)
 
-        val = np.dot(cl_vect - prev_vect, pos_vect - cl_vect)
-
+        # If the closest waypoint is behind the vehicle, just take the next waypoint.
         if val > 0:
             closest_idx = (closest_idx + 1) % len(self.waypoints_2d)
-        # rospy.logwarn("closest_idx={}".format(closest_idx))
+
         return closest_idx
-
-    # def get_closest_waypoint_idx(self):
-    #     """
-    #     Get the closest waypoint that is ahead of the current vehicle position.
-    #     """
-    #     x = self.current_pose.pose.position.x
-    #     y = self.current_pose.pose.position.y
-    #     closest_idx = self.waypoint_tree.query([x, y], 1)[1]
-    #     # Return one point                             ^
-    #     # Get the index of the point                      ^
-
-    #     # Is the closest waypoint ahead or behind the vehicle?
-    #     closest_coord = self.waypoints_2d[closest_idx]
-    #     prev_coord    = self.waypoints_2d[closest_idx-1]
-
-    #     # Equation for hyperplane through closest coords.
-    #     closest_vect = np.array(closest_coord)
-    #     prev_vect    = np.array(prev_coord)
-    #     pose_vect    = np.array([x, y])
-    #     val = np.dot(closest_vect - prev_vect, pose_vect - closest_vect)
-
-    #     # If the closest waypoint is behind the vehicle, just take the next waypoint.
-    #     if val > 0:
-    #         closest_idx = (closest_idx + 1) % len(self.waypoints_2d)
-
-    #     return closest_idx
 
     def publish_waypoints(self, closest_idx):
         """
@@ -247,20 +226,13 @@ class WaypointUpdater(object):
     def set_waypoint_velocity(self, waypoints, waypoint, velocity):
         waypoints[waypoint].twist.twist.linear.x = velocity
 
-    # def distance(self, waypoints, wp1, wp2):
-    #     """
-    #     Accumulate piece-wise distance for each segment betweeen 'wp1' and 'wp2'.
-    #     """
-    #     dist = 0
-    #     dl = lambda a, b: math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2  + (a.z-b.z)**2)
-    #     for i in range(wp1, wp2+1):
-    #         dist += dl(waypoints[wp1].pose.pose.position, waypoints[i].pose.pose.position)
-    #         wp1 = i
-    #     return dist
     def distance(self, waypoints, wp1, wp2):
+        """
+        Accumulate piece-wise distance for each segment betweeen 'wp1' and 'wp2'.
+        """
         dist = 0
-        dl = lambda a, b: math.sqrt(pow((a.x - b.x), 2) + pow((a.y - b.y), 2) + pow((a.z - b.z), 2))
-        for i in range(wp1, wp2 + 1):
+        dl = lambda a, b: math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2  + (a.z-b.z)**2)
+        for i in range(wp1, wp2+1):
             dist += dl(waypoints[wp1].pose.pose.position, waypoints[i].pose.pose.position)
             wp1 = i
         return dist
