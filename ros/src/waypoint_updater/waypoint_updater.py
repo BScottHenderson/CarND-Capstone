@@ -122,8 +122,8 @@ class WaypointUpdater(object):
         # Get the next LOOKAHEAD_WPS waypoints in front of the current vehicle position.
         closest_idx  = self.get_closest_waypoint_idx()
         farthest_idx = closest_idx + LOOKAHEAD_WPS
-        waypoints = self.base_waypoints.waypoints[closest_idx:farthest_idx]
-        # waypoints = list(islice(self.waypoints_cycle, closest_idx, closest_idx + LOOKAHEAD_WPS))
+        # waypoints = self.base_waypoints.waypoints[closest_idx:farthest_idx]
+        waypoints = list(islice(self.waypoints_cycle, closest_idx, closest_idx + LOOKAHEAD_WPS))
 
         # If we have not detected a traffic light or we have but it's still farther away
         # than our lookahead buffer (LOOKAHEAD_WPS), then just return waypoints without
@@ -174,6 +174,7 @@ class WaypointUpdater(object):
 
     def waypoints_cb(self, waypoints):
         self.base_waypoints = waypoints
+        self.waypoints_cycle = cycle(self.base_waypoints.waypoints)
         if not self.waypoints_2d:
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in
                                  waypoints.waypoints]
