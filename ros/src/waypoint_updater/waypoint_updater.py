@@ -27,7 +27,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
 PUBLISH_RATE  = 50  # Waypoint publish rate in Hz.
-LOOKAHEAD_WPS = 80  # Number of waypoints we will publish. You can change this number
+LOOKAHEAD_WPS = 100 # Number of waypoints we will publish. You can change this number
 MAX_DECEL     = 0.5 # Deceleration limit.
 MAX_SPEED_METERS_PER_SEC = 10*0.447 # 10 mph
 
@@ -53,7 +53,7 @@ class WaypointUpdater(object):
         self.current_pose     = None # Current vehicle position.
         self.current_velocity = None # Current vehicle velocity.
         self.base_waypoints   = None # A list of all waypoints for the track.
-        self.waypoints_cycle  = None # Waypoints cycle (wrap-around).
+        # self.waypoints_cycle  = None # Waypoints cycle (wrap-around).
         self.waypoints_2d     = None # Waypoints in 2D (z coordinate removed).
         self.waypoint_tree    = None # KDTree of 2D waypoints.
         self.stopline_wp_idx  = -1   # Waypoint index for a red light stop line.
@@ -124,6 +124,7 @@ class WaypointUpdater(object):
         farthest_idx = closest_idx + LOOKAHEAD_WPS
         waypoints = self.base_waypoints.waypoints[closest_idx:farthest_idx]
         # waypoints = list(islice(self.waypoints_cycle, closest_idx, closest_idx + LOOKAHEAD_WPS))
+        # Using list(islice(cycle(waypoints))) should work. But it doesn't.
 
         # If we have not detected a traffic light or we have but it's still farther away
         # than our lookahead buffer (LOOKAHEAD_WPS), then just return waypoints without
@@ -176,7 +177,7 @@ class WaypointUpdater(object):
         # Save waypoints for later use.
         # This list includes all waypoints for the track - the '/base_waypoints' publisher publishes only once.
         self.base_waypoints = waypoints
-        self.waypoints_cycle = cycle(self.base_waypoints.waypoints)
+        # self.waypoints_cycle = cycle(self.base_waypoints.waypoints)
         rospy.loginfo('Received {} waypoints.'.format(len(self.base_waypoints.waypoints)))
         # 2D version of base waypoints - z-coordinate removed.
         self.waypoints_2d  = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.base_waypoints.waypoints]
