@@ -26,7 +26,7 @@ class TLDetector(object):
         self.base_waypoints   = None
         self.waypoints_2d     = None    # Waypoints in 2D (z coordinate removed).
         self.waypoints_tree   = None    # KDTree of 2D waypoints.
-        self.lights           = []
+        self.traffic_lights   = []
         self.camera_image     = None
         self.camera_image_raw = None
 
@@ -86,8 +86,8 @@ class TLDetector(object):
         rospy.logwarn('tl_detector: Translated waypoints to 2D and created KDTree.')
 
     def traffic_light_cb(self, msg):
-        self.lights = msg.lights    # Array of TrafficLight objects.
-        rospy.logwarn('tl_detector: Received {} traffic lights.'.format(len(self.lights)))
+        self.traffic_lightss = msg.lights   # Array of TrafficLight objects.
+        rospy.logwarn('tl_detector: Received {} traffic lights.'.format(len(self.traffic_lights)))
 
     def image_cb(self, msg):
         """Identifies red lights in the incoming camera image and publishes the index
@@ -151,7 +151,8 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        rospy.logwarn('tl_detector: get_light_state: ({}, {}) {}'.format(light.pose.position.x, light.pose.position.y, light.state))
+        rospy.logwarn('tl_detector: get_light_state: ({}, {}) {}'.format(
+            light.pose.pose.position.x, light.pose.pose.position.y, light.state))
         """
         The simulator provides light state but for the real car we must use a classifier to determine light state.
 
@@ -185,7 +186,7 @@ class TLDetector(object):
 
             #TODO find the closest visible traffic light (if one exists)
             diff = len(self.base_waypoints.waypoints)   # Distance in indices between vehicle wp and closest light wp.
-            for i, light in enumerate(self.lights):
+            for i, light in enumerate(self.traffic_lights):
                 # Get stop line waypoint index.
                 line = stop_line_positions[i]
                 temp_wp_idx = self.get_closest_waypoint(line[0], line[1])
