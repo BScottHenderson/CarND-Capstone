@@ -22,7 +22,7 @@ class TLDetector(object):
         rospy.init_node('tl_detector')
 
         # Telemetry data
-        self.pose             = None
+        self.current_pose     = None
         self.base_waypoints   = None
         self.waypoints_2d     = None    # Waypoints in 2D (z coordinate removed).
         self.waypoints_tree   = None    # KDTree of 2D waypoints.
@@ -87,6 +87,7 @@ class TLDetector(object):
 
     def traffic_light_cb(self, msg):
         self.lights = msg.lights    # Array of TrafficLight objects.
+        rospy.logwarn('tl_detector: Received {} traffic lights.'.format(len(self.lights)))
 
     def image_cb(self, msg):
         """Identifies red lights in the incoming camera image and publishes the index
@@ -150,6 +151,7 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
+        rospy.logwarn('tl_detector: get_light_state: ({}, {}) {}'.format(light.pose.position.x, light.pose.position.y, light.state))
         """
         The simulator provides light state but for the real car we must use a classifier to determine light state.
 
@@ -178,8 +180,8 @@ class TLDetector(object):
 
         # List of positions that correspond to the line to stop in front of for a given intersection
         stop_line_positions = self.config['stop_line_positions']
-        if self.pose:
-            car_wp_idx = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
+        if self.current_pose:
+            car_wp_idx = self.get_closest_waypoint(self.current_pose.pose.position.x, self.current_pose.pose.position.y)
 
             #TODO find the closest visible traffic light (if one exists)
             diff = len(self.base_waypoints.waypoints)   # Distance in indices between vehicle wp and closest light wp.
