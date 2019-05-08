@@ -86,7 +86,7 @@ class TLDetector(object):
         rospy.logwarn('tl_detector: Translated waypoints to 2D and created KDTree.')
 
     def traffic_light_cb(self, msg):
-        self.traffic_lightss = msg.lights   # Array of TrafficLight objects.
+        self.traffic_lights = msg.lights    # Array of TrafficLight objects.
         rospy.logwarn('tl_detector: Received {} traffic lights.'.format(len(self.traffic_lights)))
 
     def image_cb(self, msg):
@@ -201,6 +201,7 @@ class TLDetector(object):
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
 
+        rospy.logwarn('tl_detector: process_traffic_lights: No traffic light found.')
         return -1, TrafficLight.UNKNOWN
 
 
