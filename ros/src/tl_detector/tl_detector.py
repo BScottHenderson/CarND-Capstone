@@ -126,6 +126,18 @@ class TLDetector(object):
     # Helper Functions
     #
 
+    def traffic_light_to_string(self, light):
+        light_str = '({}, {}) '.format(light.pose.pose.position.x, light.pose.pose.position.y)
+        if light.state == TrafficLight.RED:
+            light_str += 'RED'
+        elif light.state == TrafficLight.YELLOW:
+            light_str += 'YELLOW'
+        elif light.state == TrafficLight.GREEN:
+            light_str += 'GREEN'
+        else:
+            light_str += 'UNKNOWN'
+        return light_str
+
     def get_closest_waypoint(self, x, y):
         """Identifies the closest path waypoint to the given position
             https://en.wikipedia.org/wiki/Closest_pair_of_points_problem
@@ -151,8 +163,7 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        rospy.logwarn('tl_detector: get_light_state: ({}, {}) {}'.format(
-            light.pose.pose.position.x, light.pose.pose.position.y, light.state))
+        rospy.logwarn('tl_detector: get_light_state: ({}, {}) {}'.format(self.traffic_light_to_string(light)))
         """
         The simulator provides light state but for the real car we must use a classifier to determine light state.
 
