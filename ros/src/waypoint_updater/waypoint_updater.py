@@ -138,6 +138,7 @@ class WaypointUpdater(object):
         return lane
 
     def decelerate_waypoints(self, waypoints, closest_idx):
+        rospy.logwarn('waypoint_updater: decelerate_waypoints: waypoint_count={}, closest_idx={}'.format(len(waypoints), closest_idx))
         new_waypoints = []
         for i, wp in enumerate(waypoints):
             p = Waypoint()
