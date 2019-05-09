@@ -95,7 +95,6 @@ class TLDetector(object):
         Args:
             msg (Image): image from car-mounted camera
         """
-        return
         self.camera_image = msg
         light_wp, state   = self.process_traffic_lights()
 
@@ -168,7 +167,6 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        rospy.logwarn('tl_detector: get_light_state: {}'.format(self.traffic_light_to_string(light)))
         """
         The simulator provides light state but for the real car we must use a classifier to determine light state.
 
