@@ -31,6 +31,9 @@ that we have created in the `__init__` function.
 
 '''
 
+PUBLISH_RATE = 50   # Control publish rate in Hz.
+
+
 class DBWNode(object):
     def __init__(self):
         rospy.init_node('dbw_node')
@@ -63,12 +66,12 @@ class DBWNode(object):
                                      max_steer_angle=max_steer_angle)
 
         # TODO: Subscribe to all the topics you need to
-        rospy.Subscriber('/dbw_enabled',      Bool,         self.dbw_enabled_cb)
-        rospy.Subscriber('/twist_cmd',        TwistStamped, self.twist_cmd_cb)
-        rospy.Subscriber('/current_velocity', TwistStamped, self.current_velocity_cb)
+        rospy.Subscriber('/vehicle/dbw_enabled', Bool,         self.dbw_enabled_cb)
+        rospy.Subscriber('/twist_cmd',           TwistStamped, self.twist_cmd_cb)
+        rospy.Subscriber('/current_velocity',    TwistStamped, self.current_velocity_cb)
 
         # Class variables
-        self.dbw_enabled              = None    # I haven't seen messages on the /dbw_enabled topic so set this to True to start.
+        self.dbw_enabled              = None
         self.current_velocity         = None
         self.current_angular_velocity = None
         self.linear_velocity          = None
@@ -81,7 +84,7 @@ class DBWNode(object):
         self.loop()
 
     def loop(self):
-        rate = rospy.Rate(50) # 50Hz
+        rate = rospy.Rate(PUBLISH_RATE)
         while not rospy.is_shutdown():
             # TODO: Get predicted throttle, brake, and steering using `twist_controller`
             # You should only publish the control commands if dbw is enabled
@@ -116,11 +119,6 @@ class DBWNode(object):
     def dbw_enabled_cb(self, msg):
         # Is Drive-By-Wire enabled? It not then the human driver has control.
         self.dbw_enabled = msg
-
-        # Reset controller in case drive by wire was turned on
-        if self.dbw_enabled:
-            self.controller.reset()
-
         rospy.logwarn('Drive-By-Wire turned {}'.format('on' if self.dbw_enabled else 'off'))
 
     def twist_cmd_cb(self, msg):
