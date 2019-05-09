@@ -95,7 +95,6 @@ class TLDetector(object):
         Args:
             msg (Image): image from car-mounted camera
         """
-        rospy.logwarn('tl_detector: image_cb: Received image.')
         return
         self.camera_image = msg
         light_wp, state   = self.process_traffic_lights()
