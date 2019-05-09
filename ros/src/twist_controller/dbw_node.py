@@ -68,7 +68,7 @@ class DBWNode(object):
         rospy.Subscriber('/current_velocity', TwistStamped, self.current_velocity_cb)
 
         # Class variables
-        self.dbw_enabled              = True    # I haven't seen messages on the /dbw_enabled topic so set this to True to start.
+        self.dbw_enabled              = None    # I haven't seen messages on the /dbw_enabled topic so set this to True to start.
         self.current_velocity         = None
         self.current_angular_velocity = None
         self.linear_velocity          = None
@@ -115,7 +115,13 @@ class DBWNode(object):
 
     def dbw_enabled_cb(self, msg):
         # Is Drive-By-Wire enabled? It not then the human driver has control.
-        self.dbw_enabled = msg.data
+        self.dbw_enabled = msg
+
+        # Reset controller in case drive by wire was turned on
+        if self.dbw_enabled:
+            self.controller.reset()
+
+        rospy.logwarn('Drive-By-Wire turned {}'.format('on' if self.dbw_enabled else 'off'))
 
     def twist_cmd_cb(self, msg):
         self.linear_velocity  = msg.twist.linear.x
