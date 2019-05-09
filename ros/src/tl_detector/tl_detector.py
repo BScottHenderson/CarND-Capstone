@@ -215,11 +215,11 @@ class TLDetector(object):
 
         if closest_light:
             state = self.get_light_state(closest_light)
-            rospy.logwarn('tl_detector: process_traffic_lights: Traffic light found at {} - {}.'.format(
-                line_wp_idx, self.traffic_light_state_to_string(state)))
+            # rospy.logwarn('tl_detector: process_traffic_lights: Traffic light found at {} - {}.'.format(
+            #     line_wp_idx, self.traffic_light_state_to_string(state)))
             return line_wp_idx, state
 
-        rospy.logwarn('tl_detector: process_traffic_lights: No traffic light found.')
+        # rospy.logwarn('tl_detector: process_traffic_lights: No traffic light found.')
         return -1, TrafficLight.UNKNOWN
 
 
