@@ -141,7 +141,7 @@ class TLDetector(object):
     def traffic_light_to_string(self, light):
         light_str = '({}, {}) {}'.format(
             light.pose.pose.position.x, light.pose.pose.position.y,
-            self.traffic_light_state_to_string(light.state)))
+            self.traffic_light_state_to_string(light.state))
         return light_str
 
     def get_closest_waypoint(self, x, y):
