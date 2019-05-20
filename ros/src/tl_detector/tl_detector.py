@@ -179,6 +179,7 @@ class TLDetector(object):
         # Get classification
         return self.light_classifier.get_classification(cv_image)
         """
+        # Just use the simulator data for now until performance issues are resolved.
         return light.state
 
     def process_traffic_lights(self):
