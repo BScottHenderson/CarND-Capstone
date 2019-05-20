@@ -116,7 +116,7 @@ class TLDetector(object):
             self.last_wp    = light_wp
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
         else:
-            rospy.logwarn('tl_detector: still within state count threshold ({}/{})'.format(state_count, STATE_COUNT_THRESHOLD))
+            rospy.logwarn('tl_detector: still within state count threshold ({}/{})'.format(self.state_count, STATE_COUNT_THRESHOLD))
             # Not at threshold yet, maintain previous light wp.
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
         self.state_count += 1
