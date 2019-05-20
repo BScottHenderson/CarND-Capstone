@@ -124,7 +124,7 @@ class WaypointUpdater(object):
         farthest_idx = closest_idx + LOOKAHEAD_WPS
         waypoints = self.base_waypoints.waypoints[closest_idx:farthest_idx]
         # waypoints = list(islice(self.waypoints_cycle, closest_idx, closest_idx + LOOKAHEAD_WPS))
-        # Using list(islice(cycle(waypoints))) should work. But it doesn't.
+        # Using 'list(islice(cycle(waypoints)))' should work. But it doesn't.
 
         # If we have not detected a traffic light or we have but it's still farther away
         # than our lookahead buffer (LOOKAHEAD_WPS), then just return waypoints without
@@ -138,7 +138,7 @@ class WaypointUpdater(object):
         return lane
 
     def decelerate_waypoints(self, waypoints, closest_idx):
-        # rospy.logwarn('waypoint_updater: decelerate_waypoints: waypoint_count={}, closest_idx={}'.format(len(waypoints), closest_idx))
+        rospy.logwarn('waypoint_updater: decelerate_waypoints: waypoint_count={}, closest_idx={}'.format(len(waypoints), closest_idx))
         new_waypoints = []
         for i, wp in enumerate(waypoints):
             p = Waypoint()
