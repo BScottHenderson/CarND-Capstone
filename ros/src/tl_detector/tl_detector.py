@@ -150,7 +150,6 @@ class TLDetector(object):
 
         Returns:
             int: index of the closest waypoint in self.waypoints
-
         """
         closest_idx = self.waypoint_tree.query([x, y], 1)[1]
         # Return one point                             ^
@@ -165,8 +164,8 @@ class TLDetector(object):
 
         Returns:
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
-
         """
+
         """
         The simulator provides light state but for the real car we must use a classifier to determine light state.
 
@@ -179,6 +178,7 @@ class TLDetector(object):
         # Get classification
         return self.light_classifier.get_classification(cv_image)
         """
+
         # Just use the simulator data for now until performance issues are resolved.
         return light.state
 
@@ -189,7 +189,6 @@ class TLDetector(object):
         Returns:
             int: index of waypoint closes to the upcoming stop line for a traffic light (-1 if none exists)
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
-
         """
         closest_light = None
         line_wp_idx   = None
@@ -216,11 +215,11 @@ class TLDetector(object):
 
         if closest_light:
             state = self.get_light_state(closest_light)
-            # rospy.logwarn('tl_detector: process_traffic_lights: Traffic light found at {} - {}.'.format(
-            #     line_wp_idx, self.traffic_light_state_to_string(state)))
+            rospy.logwarn('tl_detector: process_traffic_lights: Traffic light found at {} - {}.'.format(
+                line_wp_idx, self.traffic_light_state_to_string(state)))
             return line_wp_idx, state
 
-        # rospy.logwarn('tl_detector: process_traffic_lights: No traffic light found.')
+        rospy.logwarn('tl_detector: process_traffic_lights: No traffic light found.')
         return -1, TrafficLight.UNKNOWN
 
 
