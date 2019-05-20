@@ -104,9 +104,11 @@ class TLDetector(object):
         of times till we start using it. Otherwise the previous stable state is used.
         """
         if self.state != state:
+            rospy.logwarn('tl_detector: new state')
             self.state_count = 0
             self.state       = state
         elif self.state_count >= STATE_COUNT_THRESHOLD:
+            rospy.logwarn('tl_detector: state count threshold ({}) exceeded'.format(STATE_COUNT_THRESHOLD))
             # Reached the threshold, use the new light wp index.
             # :TODO Modify this code to handle TrafficLight.YELLOW
             self.last_state = self.state
@@ -114,6 +116,7 @@ class TLDetector(object):
             self.last_wp    = light_wp
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
         else:
+            rospy.logwarn('tl_detector: still within state count threshold ({}/{})'.format(state_count, STATE_COUNT_THRESHOLD))
             # Not at threshold yet, maintain previous light wp.
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
         self.state_count += 1
@@ -215,11 +218,11 @@ class TLDetector(object):
 
         if closest_light:
             state = self.get_light_state(closest_light)
-            rospy.logwarn('tl_detector: process_traffic_lights: Traffic light found at {} - {}.'.format(
-                line_wp_idx, self.traffic_light_state_to_string(state)))
+            # rospy.logwarn('tl_detector: process_traffic_lights: Traffic light found at {} - {}.'.format(
+            #     line_wp_idx, self.traffic_light_state_to_string(state)))
             return line_wp_idx, state
 
-        rospy.logwarn('tl_detector: process_traffic_lights: No traffic light found.')
+        # rospy.logwarn('tl_detector: process_traffic_lights: No traffic light found.')
         return -1, TrafficLight.UNKNOWN
 
 
