@@ -1,0 +1,39 @@
+pip install --upgrade catkin_pkg_modules
+
+
+current controller implementation will have the car wandering back and forth within the lane
+should pass the grader but is not ideal
+
+autoware code artifact
+does not recompute trajectory until the car has passed a certain distance away from the waypoints
+or a certain angle away from the waypoint trajectory
+
+to resolve, look at waypoint_follower C++ code
+update vehicle position all the time, not just when certain distance or certain angle threshold is passed
+- function to check if we're following waypoints
+- if not following waypoints, update trajectory
+
+-> modify to follow the waypoints all the time
+
+pure_pursuit_core.cpp
+line 255: set following_flag to false instead of calling verifyFollowing()
+
+
+
+alternate fixes:
+	change the yaw controller to dampen steering a bit
+	add a dampening term that considers the difference between current angular velocity and target angular velocity
+	if there is no difference then don't dampen steering
+	if the difference is "large" then add dampening
+
+
+waypoint_loader/waypoint_loader.py:
+	decelerate()
+	lane.header format: frame_id, stamp (current time, e.g., rospy.Time(0))
+	pose.orientation based on yaw -> use Quaternion (???)
+
+	self.velocity = self.kmph2mps(rospy.get_param('~velocity'))
+
+    def kmph2mps(self, velocity_kmph):
+        return (velocity_kmph * 1000.) / (60. * 60.)
+
