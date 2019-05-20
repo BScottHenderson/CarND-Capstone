@@ -26,8 +26,8 @@ as well as to verify your TL classifier.
 TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
-PUBLISH_RATE  = 50  # Waypoint publish rate in Hz.
-LOOKAHEAD_WPS = 50  # Number of waypoints we will publish. You can change this number
+PUBLISH_RATE  = 40  # Waypoint publish rate in Hz.
+LOOKAHEAD_WPS = 35  # Number of waypoints we will publish. You can change this number
 MAX_DECEL     = 0.5 # Deceleration limit.
 MAX_SPEED_METERS_PER_SEC = 10*0.447 # 10 mph
 
