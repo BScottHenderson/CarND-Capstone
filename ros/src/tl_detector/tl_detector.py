@@ -169,21 +169,19 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
         """
 
-        """
-        The simulator provides light state but for the real car we must use a classifier to determine light state.
+        # The simulator provides light state but for the real car we must use a classifier to determine light state.
 
         if not self.camera_image:
             return TrafficLight.UNKNOWN
 
         # Convert from rospy Image to OpenCV.
-        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, 'bgr8')
 
         # Get classification
         return self.light_classifier.get_classification(cv_image)
-        """
 
         # Just use the simulator data for now until performance issues are resolved.
-        return light.state
+        # return light.state
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
