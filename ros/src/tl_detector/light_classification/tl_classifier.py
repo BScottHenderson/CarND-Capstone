@@ -55,7 +55,7 @@ class TLClassifier(object):
         img = cv2.medianBlur(img, 5)
         img = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        circles = cv2.HoughCircles(img, cv2.CV_HOUGH_GRADIENT, 1, 20,
+        circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 20,
                                    param1=50, param2=30, minRadius=20, maxRadius=30)
 
         return True if circles is not None else False
